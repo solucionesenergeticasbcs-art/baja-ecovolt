@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // SALES AGENT modal logic
-  const openAgentBtns = document.querySelectorAll('#open-agent, #open-agent-2');
   const agentModal = document.getElementById('sales-agent');
   const closeAgent = document.getElementById('close-agent');
   const startQualify = document.getElementById('start-qualify');
@@ -94,45 +93,46 @@ document.addEventListener('DOMContentLoaded', function () {
   function showAgent(step) {
     if (!agentModal) return;
     agentModal.setAttribute('aria-hidden', 'false');
-    agentSteps.forEach(s => (s.style.display = 'none'));
+    agentSteps.forEach(s => s.style.display = 'none');
     const target = agentSteps.find(s => Number(s.dataset.step) === step);
     if (target) target.style.display = 'block';
-    console.log('Agent modal opened, step:', step);
+    currentStep = step;
+    console.log('Showing agent step:', step);
   }
 
-  openAgentBtns.forEach(b => {
-    if (b) {
-      b.addEventListener('click', (e) => {
-        e.preventDefault();
-        showAgent(1);
-        currentStep = 1;
-        console.log('Open agent button clicked');
-      });
+  // Open agent modal via event delegation (more reliable)
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('#open-agent, #open-agent-2');
+    if (btn) {
+      e.preventDefault();
+      showAgent(1);
+      console.log('Agent modal opened from button');
     }
   });
-  closeAgent?.addEventListener('click', () => {
-    if (agentModal) agentModal.setAttribute('aria-hidden', 'true');
+
+  closeAgent?.addEventListener('click', function() {
+    agentModal?.setAttribute('aria-hidden', 'true');
+    console.log('Agent modal closed');
   });
 
   // Start qualification
   startQualify?.addEventListener('click', function () {
     answers.length = 0;
-    currentStep = 2;
-    showAgent(currentStep);
+    showAgent(2);
+    console.log('Qualification started');
   });
 
   // Handle question buttons
   agentState?.addEventListener('click', function (e) {
     const qbtn = e.target.closest('.qbtn');
     if (!qbtn) return;
-    answers.push(qbtn.dataset.answer || qbtn.textContent.trim());
+    const answer = qbtn.dataset.answer || qbtn.textContent.trim();
+    answers.push(answer);
+    console.log('Answer selected:', answer);
     if (currentStep < 4) {
-      currentStep += 1;
-      showAgent(currentStep);
+      showAgent(currentStep + 1);
     } else {
-      // move to lead capture
-      currentStep = 5;
-      showAgent(currentStep);
+      showAgent(5);
     }
   });
 
@@ -145,17 +145,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const phone = fd.get('phone');
     const email = fd.get('email');
     const address = fd.get('address');
+    const customKW = fd.get('custom_kw');
 
     // Prepare a short summary
-    const chosenPackage = packageSelect.options[packageSelect.selectedIndex]?.text || 'Paquete no seleccionado';
-    const price = Number(packageSelect.options[packageSelect.selectedIndex]?.dataset.price || 0);
+    let chosenPackage = packageSelect.options[packageSelect.selectedIndex]?.text || 'Paquete no seleccionado';
+    let price = Number(packageSelect.options[packageSelect.selectedIndex]?.dataset.price || 0);
+
+    // If custom kW is provided (25-60 kW), apply 5% discount to base price
+    if (customKW && customKW >= 25 && customKW <= 60) {
+      // Base cost per kW: $17,843
+      const basePricePerKW = 17843;
+      price = Math.round(basePricePerKW * customKW * 1.16); // Include 16% IVA
+      // Apply 5% discount for large systems
+      price = Math.round(price * 0.95);
+      chosenPackage = `Sistema personalizado ${customKW} kW`;
+    }
+
     const anticipo = Math.round(price * 0.7);
     const resto = price - anticipo;
     const cuota1 = Math.round(resto / 2);
     const cuota2 = resto - cuota1;
 
     const summaryEl = document.getElementById('agent-summary');
-    summaryEl.innerHTML = `Gracias ${name}. Cotización: <strong>${chosenPackage}</strong> — ${formatMXN(price)}.<br>Anticipo (70%): <strong>${formatMXN(anticipo)}</strong>. Resto: ${formatMXN(resto)} (2 pagos: ${formatMXN(cuota1)} y ${formatMXN(cuota2)}).`; 
+    let discountNote = customKW && customKW >= 25 && customKW <= 60 ? '<br><strong style="color: #0ea5a4;">✓ Descuento adicional 5% aplicado para sistema personalizado</strong>' : '';
+    summaryEl.innerHTML = `Gracias ${name}. Cotización: <strong>${chosenPackage}</strong> — ${formatMXN(price)}.<br>Anticipo (70%): <strong>${formatMXN(anticipo)}</strong>. Resto: ${formatMXN(resto)} (2 pagos: ${formatMXN(cuota1)} y ${formatMXN(cuota2)}).${discountNote}`; 
 
     // If FORMSPREE_ENDPOINT is set, send this lead there as well
     if (FORMSPREE_ENDPOINT && FORMSPREE_ENDPOINT.length > 5) {
@@ -181,5 +194,65 @@ document.addEventListener('DOMContentLoaded', function () {
   // Close after confirmation
   document.getElementById('agent-close-done')?.addEventListener('click', function () {
     agentModal?.setAttribute('aria-hidden', 'true');
+  });
+
+  // CALCULATOR: Solar consumption calculator with WhatsApp integration
+  const calculatorForm = document.getElementById('calculator-form');
+  const calcResult = document.getElementById('calc-result');
+  const resultText = document.getElementById('result-text');
+  const whatsappLink = document.getElementById('whatsapp-link');
+
+  const WHATSAPP_NUMBER = '6122138429'; // WhatsApp number for contact
+  const HIS_BCS = 5.9; // Horas de Irradiancia Solar en Baja California Sur
+  
+  // Calculate required kW based on monthly consumption and HIS
+  function recommendSystem(consumption) {
+    // Formula: kW requerido = Consumo mensual (kWh) / (HIS * 30 días)
+    const requiredKW = consumption / (HIS_BCS * 30);
+    let recommendation;
+
+    if (requiredKW <= 3.5) {
+      recommendation = { kw: '3kW', name: 'Sistema 3 kW', price: 62091, paneles: 6, calc: requiredKW.toFixed(2) };
+    } else if (requiredKW <= 4.5) {
+      recommendation = { kw: '4kW', name: 'Sistema 4 kW', price: 82982, paneles: 8, calc: requiredKW.toFixed(2) };
+    } else if (requiredKW <= 5.5) {
+      recommendation = { kw: '5kW', name: 'Sistema 5 kW', price: 103633, paneles: 10, calc: requiredKW.toFixed(2) };
+    } else if (requiredKW <= 6.5) {
+      recommendation = { kw: '6kW', name: 'Sistema 6 kW', price: 124284, paneles: 12, calc: requiredKW.toFixed(2) };
+    } else if (requiredKW <= 7.5) {
+      recommendation = { kw: '7kW', name: 'Sistema 7 kW', price: 145207, paneles: 14, calc: requiredKW.toFixed(2) };
+    } else {
+      recommendation = { kw: '8kW', name: 'Sistema 8 kW', price: 166130, paneles: 16, calc: requiredKW.toFixed(2) };
+    }
+    return recommendation;
+  }
+
+  calculatorForm?.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const consumption = Number(document.getElementById('consumption').value);
+    const name = document.getElementById('calc-name').value;
+    const recommendation = recommendSystem(consumption);
+
+    const anticipo = Math.round(recommendation.price * 0.7);
+    const resto = recommendation.price - anticipo;
+
+    const resultHTML = `
+      <strong>${name}</strong>, basado en tu consumo de <strong>${consumption} kWh/mes</strong> y considerando <strong>5.9 HIS</strong> en Baja California Sur:<br><br>
+      <strong>${recommendation.name}</strong> (${recommendation.calc} kW calculado) — ${recommendation.paneles} paneles<br>
+      Precio: <strong>${formatMXN(recommendation.price)}</strong><br>
+      Con 10% descuento incluido.<br><br>
+      Plan 70/30:<br>
+      • Anticipo: ${formatMXN(anticipo)}<br>
+      • Resto: ${formatMXN(resto)} en 2 cuotas
+    `;
+    resultText.innerHTML = resultHTML;
+
+    // Generate WhatsApp message
+    const whatsappMessage = `Hola, soy ${name}. Mi consumo mensual es de ${consumption} kWh/mes. Basado en 5.9 HIS en BCS, me interesa el ${recommendation.name} (${recommendation.paneles} paneles) con precio de ${formatMXN(recommendation.price)} con 10% descuento. Plan 70/30: Anticipo ${formatMXN(anticipo)}, Resto ${formatMXN(resto)} en 2 pagos. ¿Pueden enviarme más información?`;
+    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
+    
+    whatsappLink.href = whatsappURL;
+    calcResult.style.display = 'block';
+    calcResult.scrollIntoView({ behavior: 'smooth' });
   });
 });

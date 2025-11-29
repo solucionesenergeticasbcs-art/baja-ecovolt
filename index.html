@@ -14,8 +14,11 @@
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">
-        <h1>BAJA <span>ecovolt</span></h1>
-        <p class="slogan">15 Años de Experiencia. Su Inversión más Segura en Energía.</p>
+        <img src="assets/BAJA-ECOCVOLT-LOGO.svg" alt="BAJA eco-volt logo" class="logo" onerror="this.style.display='none'">
+        <div>
+          <h1>BAJA <span>ecovolt</span></h1>
+          <p class="slogan">15 Años de Experiencia. Su Inversión más Segura en Energía.</p>
+        </div>
       </div>
       <nav class="top-nav">
         <button id="open-agent" class="btn primary">Hablar con Ricardo</button>
@@ -78,35 +81,59 @@
           <p class="price">$62,091 MXN</p>
           <button class="btn select-package">Seleccionar</button>
         </div>
-        <div class="card product" data-key="4kw" data-price="83151">
+        <div class="card product" data-key="4kw" data-price="82982">
           <h4>4 kW — 8 paneles</h4>
           <p>Perfecto para hogares promedio.</p>
-          <p class="price">$83,151 MXN</p>
+          <p class="price">$82,982 MXN</p>
           <button class="btn select-package">Seleccionar</button>
         </div>
-        <div class="card product" data-key="5kw" data-price="103680">
+        <div class="card product" data-key="5kw" data-price="103633">
           <h4>5 kW — 10 paneles</h4>
           <p>Para familias grandes.</p>
-          <p class="price">$103,680 MXN</p>
+          <p class="price">$103,633 MXN</p>
           <button class="btn select-package">Seleccionar</button>
         </div>
-        <div class="card product" data-key="6kw" data-price="124211">
+        <div class="card product" data-key="6kw" data-price="124284">
           <h4>6 kW — 12 paneles</h4>
           <p>Casas grandes con alto consumo.</p>
-          <p class="price">$124,211 MXN</p>
+          <p class="price">$124,284 MXN</p>
           <button class="btn select-package">Seleccionar</button>
         </div>
-        <div class="card product" data-key="7kw" data-price="145256">
+        <div class="card product" data-key="7kw" data-price="145207">
           <h4>7 kW — 14 paneles</h4>
           <p>Ideal para pequeñas empresas.</p>
-          <p class="price">$145,256 MXN</p>
+          <p class="price">$145,207 MXN</p>
           <button class="btn select-package">Seleccionar</button>
         </div>
-        <div class="card product" data-key="8kw" data-price="165474">
+        <div class="card product" data-key="8kw" data-price="166130">
           <h4>8 kW — 16 paneles</h4>
           <p>Para negocios medianos.</p>
-          <p class="price">$165,474 MXN</p>
+          <p class="price">$166,130 MXN</p>
           <button class="btn select-package">Seleccionar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="calculator container" id="calculator">
+      <h3>🧮 Calculadora de Consumo Solar</h3>
+      <p>Ingresa tu consumo mensual en kW/h para recibir una recomendación personalizada y una cotización vía WhatsApp.</p>
+      <div class="calculator-box">
+        <form id="calculator-form">
+          <div class="form-group">
+            <label for="consumption">Consumo mensual (kWh)</label>
+            <input type="number" id="consumption" name="consumption" placeholder="Ej: 300" min="1" required>
+            <small>Puedes encontrar esto en tu recibo de CFE</small>
+          </div>
+          <div class="form-group">
+            <label for="calc-name">Tu nombre</label>
+            <input type="text" id="calc-name" name="name" placeholder="Tu nombre completo" required>
+          </div>
+          <button type="submit" class="btn primary large">Calcular y enviar por WhatsApp</button>
+        </form>
+        <div id="calc-result" class="calc-result" style="display: none;">
+          <h4>📊 Recomendación:</h4>
+          <p id="result-text"></p>
+          <a id="whatsapp-link" href="#" target="_blank" class="btn primary">Enviar por WhatsApp</a>
         </div>
       </div>
     </section>
@@ -164,12 +191,35 @@
       </div>
     </section>
 
+    <section class="gallery container">
+      <h3>Proyectos Realizados</h3>
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="assets/1.svg" alt="Proyecto solar 1" loading="lazy">
+        </div>
+        <div class="gallery-item">
+          <img src="assets/2.svg" alt="Proyecto solar 2" loading="lazy">
+        </div>
+        <div class="gallery-item">
+          <img src="assets/3.svg" alt="Proyecto solar 3" loading="lazy">
+        </div>
+        <div class="gallery-item">
+          <img src="assets/4.svg" alt="Proyecto solar 4" loading="lazy">
+        </div>
+        <div class="gallery-item">
+          <img src="assets/5.svg" alt="Proyecto solar 5" loading="lazy">
+        </div>
+        <div class="gallery-item">
+          <img src="assets/6.svg" alt="Proyecto industrial" loading="lazy">
+        </div>
+      </div>
+    </section>
+
     <section class="faq container">
       <h3>Notas importantes</h3>
       <ul>
         <li>Todos los precios incluyen IVA y el 10% de descuento promocional.</li>
         <li>Promoción válida hasta la segunda semana de diciembre de 2025.</li>
-        <li>Tiempo de entrega para casas modulares: 70-80 días.</li>
         <li>Garantía y soporte técnico local en México.</li>
       </ul>
     </section>
@@ -225,6 +275,7 @@
               <label>Teléfono<input name="phone" required></label>
               <label>Email<input name="email" type="email" required></label>
               <label>Dirección<textarea name="address" required></textarea></label>
+              <label>kW personalizados (opcional, 25-60 kW)<input type="number" id="custom-kw" name="custom_kw" min="25" max="60" placeholder="Ej: 30"></label>
               <div class="agent-actions"><button type="submit" class="btn primary">Enviar y recibir cotización</button></div>
             </form>
           </div>
