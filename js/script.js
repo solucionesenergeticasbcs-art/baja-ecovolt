@@ -92,14 +92,27 @@ document.addEventListener('DOMContentLoaded', function () {
   const answers = [];
 
   function showAgent(step) {
-    agentModal?.setAttribute('aria-hidden', 'false');
+    if (!agentModal) return;
+    agentModal.setAttribute('aria-hidden', 'false');
     agentSteps.forEach(s => (s.style.display = 'none'));
     const target = agentSteps.find(s => Number(s.dataset.step) === step);
     if (target) target.style.display = 'block';
+    console.log('Agent modal opened, step:', step);
   }
 
-  openAgentBtns.forEach(b => b?.addEventListener('click', () => { showAgent(1); currentStep = 1; }));
-  closeAgent?.addEventListener('click', () => agentModal?.setAttribute('aria-hidden', 'true'));
+  openAgentBtns.forEach(b => {
+    if (b) {
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAgent(1);
+        currentStep = 1;
+        console.log('Open agent button clicked');
+      });
+    }
+  });
+  closeAgent?.addEventListener('click', () => {
+    if (agentModal) agentModal.setAttribute('aria-hidden', 'true');
+  });
 
   // Start qualification
   startQualify?.addEventListener('click', function () {
