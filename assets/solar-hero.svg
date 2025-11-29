@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="1200" height="900">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#87ceeb"/>
+      <stop offset="1" stop-color="#e0f6ff"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#1a5a6b"/>
+      <stop offset="1" stop-color="#0d3d47"/>
+    </linearGradient>
+  </defs>
+  <!-- Sky background -->
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <!-- Ground -->
+  <rect y="400" width="800" height="200" fill="#8b7355"/>
+  <!-- Sun -->
+  <circle cx="700" cy="80" r="60" fill="#ffd166" opacity="0.95"/>
+  <!-- Sun rays -->
+  <g stroke="#ffd166" stroke-width="4" opacity="0.3">
+    <line x1="700" y1="0" x2="700" y2="20"/>
+    <line x1="800" y1="80" x2="780" y2="80"/>
+    <line x1="770" y1="30" x2="785" y2="45"/>
+  </g>
+  <!-- House -->
+  <rect x="80" y="280" width="240" height="140" rx="8" fill="#f5e6d3"/>
+  <polygon points="80,280 200,160 320,280" fill="#d2691e"/>
+  <!-- Door -->
+  <rect x="170" y="340" width="60" height="80" rx="4" fill="#8b4513"/>
+  <!-- Windows -->
+  <rect x="110" y="300" width="40" height="40" rx="2" fill="#87ceeb"/>
+  <line x1="130" y1="300" x2="130" y2="340" stroke="#333" stroke-width="1"/>
+  <line x1="110" y1="320" x2="150" y2="320" stroke="#333" stroke-width="1"/>
+  <rect x="250" y="300" width="40" height="40" rx="2" fill="#87ceeb"/>
+  <!-- Solar panels on roof -->
+  <g transform="translate(120, 180)">
+    <!-- Panel 1 -->
+    <rect x="0" y="0" width="50" height="60" rx="3" fill="url(#panel)" stroke="#0a2530" stroke-width="2"/>
+    <line x1="0" y1="20" x2="50" y2="20" stroke="#0a2530" stroke-width="0.5" opacity="0.5"/>
+    <line x1="0" y1="40" x2="50" y2="40" stroke="#0a2530" stroke-width="0.5" opacity="0.5"/>
+    <!-- Panel 2 -->
+    <rect x="55" y="0" width="50" height="60" rx="3" fill="url(#panel)" stroke="#0a2530" stroke-width="2"/>
+    <line x1="55" y1="20" x2="105" y2="20" stroke="#0a2530" stroke-width="0.5" opacity="0.5"/>
+    <line x1="55" y1="40" x2="105" y2="40" stroke="#0a2530" stroke-width="0.5" opacity="0.5"/>
+    <!-- Panel 3 -->
+    <rect x="110" y="0" width="50" height="60" rx="3" fill="url(#panel)" stroke="#0a2530" stroke-width="2"/>
+    <line x1="110" y1="20" x2="160" y2="20" stroke="#0a2530" stroke-width="0.5" opacity="0.5"/>
+    <line x1="110" y1="40" x2="160" y2="40" stroke="#0a2530" stroke-width="0.5" opacity="0.5"/>
+  </g>
+  <!-- Lightning bolt (energy) -->
+  <g transform="translate(600, 250)" fill="#ffd166" opacity="0.8">
+    <polygon points="0,-20 8,-5 2,5 10,20 -5,8 -2,-8"/>
+  </g>
+  <!-- Battery indicator -->
+  <rect x="520" y="450" width="120" height="70" rx="6" fill="#0ea5a4" opacity="0.9" stroke="#0d7d7a" stroke-width="2"/>
+  <text x="580" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="white" font-weight="bold">Batería LiFePO4</text>
+  <!-- Label -->
+  <text x="200" y="550" font-family="Arial, sans-serif" font-size="20" fill="#063854" font-weight="bold">Sistema Híbrido Inteligente</text>
+</svg>
