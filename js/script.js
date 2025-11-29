@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const cuota2 = resto - cuota1;
 
     // Summary text
-    const message = `Hola ${name},\n\nHemos preparado su cotización para ${selectedOption?.textContent || pkg}: ${formatMXN(price)}.\nAnticipo (70%): ${formatMXN(anticipo)}.\nResto (30%): ${formatMXN(resto)} → Pago 1: ${formatMXN(cuota1)} , Pago 2: ${formatMXN(cuota2)}.\n\nEn breve recibirá un PDF con la cotización al correo ${email}. Para formalizar, contacte a Gaby: +52 1 612 868 7728 o Hugo: +52 1 612 108 9251.`;
+    const message = `Hola ${name},\n\nHemos preparado su cotización para ${selectedOption?.textContent || pkg}: ${formatMXN(price)}.\nAnticipo (70%): ${formatMXN(anticipo)}.\nResto (30%): ${formatMXN(resto)} → Pago 1: ${formatMXN(cuota1)} , Pago 2: ${formatMXN(cuota2)}.\n\nEn breve recibirá un PDF con la cotización al correo ${email}. Para formalizar y CERRAR su descuento, comuníquese al +52 1 612 167 3200 (Ventas & Formalización).`;
 
     // Si existe FORMSPREE_ENDPOINT configurado, lo usamos para enviar el lead
     if (FORMSPREE_ENDPOINT && FORMSPREE_ENDPOINT.length > 5) {
@@ -121,22 +121,19 @@ document.addEventListener('DOMContentLoaded', function () {
     showAgent(2);
     console.log('Qualification started');
   });
-
-  // Handle question buttons
+  // Handle question buttons (generic for multiple steps)
   agentState?.addEventListener('click', function (e) {
     const qbtn = e.target.closest('.qbtn');
     if (!qbtn) return;
     const answer = qbtn.dataset.answer || qbtn.textContent.trim();
     answers.push(answer);
-    console.log('Answer selected:', answer);
-    if (currentStep < 4) {
-      showAgent(currentStep + 1);
-    } else {
-      showAgent(5);
-    }
+    console.log('Answer selected:', answer, 'All answers:', answers);
+    // Move to next step (the HTML contains steps 1..9)
+    const next = currentStep + 1 || 2;
+    showAgent(next);
   });
 
-  // Agent lead form
+  // Agent lead form (collect answers + send)
   const agentLead = document.getElementById('agent-lead');
   agentLead?.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -147,17 +144,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const address = fd.get('address');
     const customKW = fd.get('custom_kw');
 
+    // Attach answers for record
+    try { fd.append('answers', JSON.stringify(answers)); } catch (err) { console.warn('Could not append answers', err); }
+
     // Prepare a short summary
     let chosenPackage = packageSelect.options[packageSelect.selectedIndex]?.text || 'Paquete no seleccionado';
     let price = Number(packageSelect.options[packageSelect.selectedIndex]?.dataset.price || 0);
 
-    // If custom kW is provided (25-60 kW), apply 5% discount to base price
+    // If custom kW is provided (25-60 kW), compute price based on base rate and apply 5% discount
     if (customKW && customKW >= 25 && customKW <= 60) {
-      // Base cost per kW: $17,843
-      const basePricePerKW = 17843;
-      price = Math.round(basePricePerKW * customKW * 1.16); // Include 16% IVA
-      // Apply 5% discount for large systems
-      price = Math.round(price * 0.95);
+      const basePricePerKW = 17843; // base
+      price = Math.round(basePricePerKW * Number(customKW) * 1.16); // include IVA
+      price = Math.round(price * 0.95); // 5% large-system discount
       chosenPackage = `Sistema personalizado ${customKW} kW`;
     }
 
@@ -168,7 +166,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const summaryEl = document.getElementById('agent-summary');
     let discountNote = customKW && customKW >= 25 && customKW <= 60 ? '<br><strong style="color: #0ea5a4;">✓ Descuento adicional 5% aplicado para sistema personalizado</strong>' : '';
-    summaryEl.innerHTML = `Gracias ${name}. Cotización: <strong>${chosenPackage}</strong> — ${formatMXN(price)}.<br>Anticipo (70%): <strong>${formatMXN(anticipo)}</strong>. Resto: ${formatMXN(resto)} (2 pagos: ${formatMXN(cuota1)} y ${formatMXN(cuota2)}).${discountNote}`; 
+    summaryEl.innerHTML = `Gracias ${name}. Cotización: <strong>${chosenPackage}</strong> — ${formatMXN(price)}.<br>Anticipo (70%): <strong>${formatMXN(anticipo)}</strong>. Resto: ${formatMXN(resto)} (2 pagos: ${formatMXN(cuota1)} y ${formatMXN(cuota2)}).${discountNote}`;
+
+    // Include selected answers in console/log
+    console.log('Agent lead:', { name, phone, email, address, customKW, answers });
 
     // If FORMSPREE_ENDPOINT is set, send this lead there as well
     if (FORMSPREE_ENDPOINT && FORMSPREE_ENDPOINT.length > 5) {
@@ -178,15 +179,13 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(err => console.warn('Error posting agent lead', err))
         .finally(() => {
-          currentStep = 6;
+          currentStep = 9;
           showAgent(currentStep);
-          console.log('Agent lead collected:', { name, phone, email, address, answers });
           agentLead.reset();
         });
     } else {
-      currentStep = 6;
+      currentStep = 9;
       showAgent(currentStep);
-      console.log('Agent lead collected:', { name, phone, email, address, answers });
       agentLead.reset();
     }
   });
