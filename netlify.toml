@@ -1,5 +1,5 @@
 [build]
-  command = "# no build needed for static site"
+  command = ""
   publish = "."
 
 [dev]
@@ -11,6 +11,4 @@
   to = "/index.html"
   status = 200
 
-# Netlify Forms setup
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+# Netlify Forms enabled automatically
